@@ -1,6 +1,9 @@
 # California DMV Appointment Availability Tracker
 ## Introduction
-I had to find an appointment at the DMV for my behind-the-wheel test, but available dates were months away (as of August 2023). In order to catch any canceled appointments, I wrote a script to check for available appointments periodically and send me a notification if there is one. I was able to find an appointment within a day of running the script.
+I had to find an appointment at the DMV for my behind-the-wheel test, but available dates were months away (as of August 2023). In order to catch any canceled appointments, I wrote a script to check for available appointments periodically and send me a notification via Telegram if there is one. I was able to find an appointment within a day of running the script.
+
+## Screenshot
+![Screenshot of Telegram notification](./docs/screenshots/telegram.png)
 
 ## Usage
 1. Set up configuration constants by opening `bot.py`
