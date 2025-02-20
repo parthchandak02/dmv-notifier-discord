@@ -42,7 +42,20 @@ LOOKUP_INTERVAL_SEC=600
 python discord_bot.py
 ```
 
-## Docker Deployment
+## Deployment Options
+
+### Railway.app Deployment
+
+1. Fork this repository
+2. Create a new project on [Railway.app](https://railway.app)
+3. Connect your GitHub repository
+4. Add the following environment variables in Railway:
+   - `DISCORD_WEBHOOK_URL`
+   - `FIND_DATES_BEFORE`
+   - `LOOKUP_INTERVAL_SEC`
+5. Deploy! Railway will automatically use the Dockerfile
+
+### Docker Deployment
 
 Build the container:
 ```bash
