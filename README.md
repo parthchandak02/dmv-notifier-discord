@@ -1,24 +1,86 @@
-# California DMV Appointment Availability Tracker
-## Introduction
-I needed to find an appointment at the DMV for my behind-the-wheel test, but the available dates were months away (as of August 2023). To catch any canceled appointments, I wrote a script that periodically checks for available slots and sends me a notification via Telegram if one opens up. I was able to find an appointment within a day of running the script.
+# CA DMV Appointment Bot
 
-## Screenshot
-![Screenshot of Telegram notification](./docs/screenshots/telegram.png)
+A Discord bot that monitors California DMV appointment availability and notifies you when earlier dates become available.
 
-## Usage
-1. Fill in the configuration constants in `bot.py`
-2. Install the required packages with `pip install -r requirements.txt`
-3. Run the script using `python bot.py`
+## Features
 
-## Notes
-- This script will NOT create appointments for you. It will only notify you if there is an available appointment. You will have to book the appointment yourself.
-- Choose a reasonable lookup interval to avoid overwhelming the API endpoint.
-- There were some ghost appointments that were not actually available when I tried to book them.
-- Currently, the script includes branch codes for several SF Bay Area DMVs. To add a different branch, you will need to extract the branch code by inspecting the network traffic the DMV website generates when searching for appointments.
-- This script was written in just a few hours, so it is not very robust or sophisticated, but it got the job done. It may break if the DMV endpoint changes.
+- Monitors multiple DMV locations (currently Redwood City and San Mateo)
+- Sends notifications via Discord webhook
+- Configurable check intervals
+- Automatic retries on API failures
+- Rate limiting handling
+- Detailed logging
 
-## Disclaimer
-This script is for educational purposes only (again, it will NOT create an appointment for you). I am not responsible for any misuse of this script. Please use it responsibly.
+## Setup
+
+1. Create a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Create a `.env` file:
+```bash
+cp .env.example .env
+```
+
+4. Edit `.env` with your Discord webhook URL and preferences:
+```
+DISCORD_WEBHOOK_URL=your_webhook_url_here
+FIND_DATES_BEFORE=2025-02-27
+LOOKUP_INTERVAL_SEC=600
+```
+
+## Running Locally
+
+```bash
+python discord_bot.py
+```
+
+## Docker Deployment
+
+Build the container:
+```bash
+docker build -t dmv-bot .
+```
+
+Run the container:
+```bash
+docker run -d --env-file .env dmv-bot
+```
+
+## Project Structure
+
+```
+.
+├── discord_bot.py     # Main bot script
+├── requirements.txt   # Python dependencies
+├── Dockerfile        # Docker configuration
+├── .env.example     # Example environment variables
+└── README.md        # This file
+```
+
+## Error Handling
+
+The bot includes:
+- Automatic retries for failed requests
+- Exponential backoff
+- Detailed error logging
+- Discord notifications for critical errors
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
-GPLv3
+
+This project is licensed under the MIT License - see the LICENSE.md file for details.
