@@ -3,7 +3,7 @@ import os
 import requests
 import time
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List, Dict
 from dotenv import load_dotenv
 from requests.adapters import HTTPAdapter
@@ -17,7 +17,13 @@ load_dotenv()
 
 # Configuration
 NUMBER_OF_FEW_DATES = 1
-FIND_DATES_BEFORE = datetime.strptime(os.getenv("FIND_DATES_BEFORE", "2025-02-27"), "%Y-%m-%d")
+# Only alert for dates before this (YYYY-MM-DD); defaults to 30 days from today
+_find_dates_before = os.getenv("FIND_DATES_BEFORE")
+FIND_DATES_BEFORE = (
+    datetime.strptime(_find_dates_before, "%Y-%m-%d")
+    if _find_dates_before
+    else datetime.combine(datetime.now().date() + timedelta(days=30), datetime.min.time())
+)
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
 if not DISCORD_WEBHOOK_URL:
     raise ValueError("DISCORD_WEBHOOK_URL environment variable is required")
@@ -61,7 +67,7 @@ def format_date(date: datetime) -> str:
     """Format date in a human-readable format."""
     return date.strftime("%A, %B %d, %Y")
 
-def send_discord_message(content: str) -> bool:
+def send_discord_message(content: str, attempts_left: int = 3) -> bool:
     """Send a message to Discord via webhook."""
     try:
         data = {
@@ -71,15 +77,15 @@ def send_discord_message(content: str) -> bool:
         }
 
         response = http.post(DISCORD_WEBHOOK_URL, json=data, timeout=10)
-        response.raise_for_status()
 
-        # Handle rate limiting
-        if response.status_code == 429:
+        # Handle rate limiting (checked before raise_for_status, which would raise on 429)
+        if response.status_code == 429 and attempts_left > 0:
             retry_after = float(response.headers.get('Retry-After', 1))
             print(f"Rate limited by Discord. Waiting {retry_after} seconds...")
             time.sleep(retry_after)
-            return send_discord_message(content)
+            return send_discord_message(content, attempts_left - 1)
 
+        response.raise_for_status()
         return True
     except Exception as e:
         print(f"Error sending Discord message: {e}")

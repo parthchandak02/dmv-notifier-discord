@@ -25,7 +25,7 @@
 
 <img src="docs/assets/readme/discord.png" width="640" alt="Discord channel with DMV Bot's startup message and three DMV Appointment Available alerts for Redwood City and San Mateo, each with a date and a booking link">
 
-<sub>Mock-up: the bot's exact message text, laid out the way Discord renders it, with made-up dates.</sub>
+<sub>Mock-up: the script's exact message text, laid out the way Discord renders it, with made-up dates.</sub>
 
 </div>
 
@@ -72,6 +72,7 @@ A new, earlier date goes to your Discord webhook with the office, the day and th
 
 - **Only real improvements.** After the first run it posts only when an office's earliest date moves earlier, so the channel stays quiet otherwise.
 - **Two offices to start.** Redwood City and San Mateo are configured for one appointment type; other offices and services are entries in `branch_codes` and `dates_querystring`.
+- **Respects Discord rate limits.** A 429 from the webhook waits for `Retry-After` and tries again, up to three times.
 - **Backs off on errors.** Failed requests retry three times, then that office waits 5, 10, 20 minutes and up to an hour before trying again.
 - **Tells you when it breaks.** An unexpected error in the main loop is posted to the channel as a code block, then the loop resumes after a minute.
 - **No Discord bot account.** It posts through a channel webhook, so there is no token, gateway or permissions to set up.
@@ -89,7 +90,7 @@ Create a `.env` next to `discord_bot.py`:
 
 ```bash
 DISCORD_WEBHOOK_URL=        # Channel settings > Integrations > Webhooks > Copy URL
-FIND_DATES_BEFORE=2026-12-31  # only alert for dates before this
+FIND_DATES_BEFORE=2026-12-31  # only alert for dates before this (default: 30 days from today)
 LOOKUP_INTERVAL_SEC=600
 ```
 
@@ -97,9 +98,9 @@ LOOKUP_INTERVAL_SEC=600
 python discord_bot.py
 ```
 
-Set `FIND_DATES_BEFORE` yourself: the built-in default is a date in February 2025, which
-nothing will ever beat now. The office IDs and the service ID are copied from the DMV site and
-may have changed since this was last run in early 2025.
+Leave `FIND_DATES_BEFORE` out and it alerts for anything in the next 30 days. The office IDs and
+the service ID are copied from the DMV site and may have changed since this was last run in
+early 2025.
 
 ## Deploy it
 
@@ -119,7 +120,7 @@ builds from the Dockerfile.
 ```
 discord_bot.py     polling loop, DMV requests, Discord webhook posts
 requirements.txt   pinned dependencies
-Dockerfile         python:3.11-slim image that runs the bot
+Dockerfile         python:3.11-slim image that runs the script
 Procfile           worker process for Railway or Heroku-style hosts
 ```
 
